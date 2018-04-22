@@ -1,0 +1,3 @@
+export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app={{ template "redis.name" . }},release={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+
+./redis-trib.rb create $(kubectl get pods -l "app={{ template "redis.name" . }},release={{ .Release.Name }}" -o jsonpath='{range.items[*]}{.status.podIP}:6379 ')

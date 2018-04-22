@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{required "Must specify an application name." .Values.appName}}-{{ .Chart.Name }}-cluster
+  labels:
+    type: cache
+    app: {{required "Must specify an application name." .Values.appName}}
+    service: {{ .Chart.Name }}
+spec:
+  serviceName: {{required "Must specify an application name." .Values.appName}}-{{ .Chart.Name }}
+  selector:
+    matchLabels:
+      service: {{ .Chart.Name }}
+      app: {{required "Must specify an application name." .Values.appName}}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        type: cache
+        app: {{required "Must specify an application name." .Values.appName}}
+        service: {{ .Chart.Name }}
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: {{ .Chart.Name }}
+        image: {{ .Values.image.repository }}/{{ .Chart.Name }}:{{ .Values.image.tag }}
+        ports:
+        - containerPort: 6379
+        - containerPort: 16379
+        volumeMounts:
+          - mountPath: /redis
+            name: config
+          - mountPath: /data
+            name: data
+        resources:
+          requests:            
+            cpu: "100m"
+            memory: 240Mi
+          limits:
+            cpu: "250m"
+      volumes:
+        - name: config
+          configMap:
+            name: {{required "Must specify an application name." .Values.appName}}-{{ .Chart.Name }}-config
+            items: 
+            - key: redis.conf
+              path: redis.conf
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 250Mi

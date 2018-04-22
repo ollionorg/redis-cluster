@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{required "Must specify an application name." .Values.appName}}-{{ .Chart.Name }}
+spec:
+  clusterIP: None
+  ports:
+  - port: 6379
+    name: {{ .Chart.Name }}-default
+    targetPort: 6379
+    protocol: TCP
+  selector:
+    app: {{required "Must specify an application name." .Values.appName}}
+    service: {{ .Chart.Name }}

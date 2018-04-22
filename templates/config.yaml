@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{required "Must specify an application name." .Values.appName}}-{{ .Chart.Name }}-config
+data:
+  redis.conf: |
+{{ .Files.Get "configs/redis.conf" | indent 4 }}
